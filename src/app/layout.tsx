@@ -1,12 +1,11 @@
 import "~/styles/globals.css";
-
+import { Toaster } from "~/components/ui/sonner"
 import { GeistSans } from "geist/font/sans";
 import { type Metadata } from "next";
 
 export const metadata: Metadata = {
   title: "Formation",
-  description: "Form sharing never easier",
-  icons: [{ rel: "icon", url: "/favicon.ico" }],
+  description: "Form sharing easier than ever",
 };
 
 export default function RootLayout({
@@ -16,6 +15,7 @@ export default function RootLayout({
     <html lang="en" className={`${GeistSans.variable}`}>
       <body className="bg-black text-white">
         {children}
+        <Toaster />
       </body>
     </html>
   );
