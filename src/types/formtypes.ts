@@ -2,13 +2,13 @@
 // TODO: add types  
 
 export enum FormComponentType {
-  ShortText,
-  LongText,
-  ComboBox,
-  MultiSelect,
-  MultiChoice,
-  RadioGroup,
-  Slider
+  ShortText = 'shorttext',
+  LongText = 'longtext',
+  ComboBox = 'combobox',
+  MultiSelect = 'multiselect',
+  MultiChoice = 'multichoice',
+  RadioGroup = 'radiogroup',
+  Slider = 'slider'
 }
 
 
@@ -30,16 +30,12 @@ export interface FormComponent {
   options?: string[];
 }
 
-export interface FormContent {
-  data: FormComponent[];
-}
-
 export interface FormStructure {
   title: string;
   description: string | null;
-  link: string | null;
-  link_description: URL | string | null;
-  form_content: FormContent;
+  link?: string | URL | null;
+  link_description?: string | null | URL;
+  form_content: FormComponent[];
   style: FormStyle;
 }
 

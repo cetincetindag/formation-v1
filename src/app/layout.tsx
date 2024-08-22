@@ -1,5 +1,4 @@
 import "~/styles/globals.css";
-import { Toaster } from "~/components/ui/sonner"
 import { GeistSans } from "geist/font/sans";
 import { type Metadata } from "next";
 
@@ -13,9 +12,8 @@ export default function RootLayout({
 }: Readonly<{ children: React.ReactNode }>) {
   return (
     <html lang="en" className={`${GeistSans.variable}`}>
-      <body className="bg-black text-white">
+      <body className="flex flex-row justify-center items-center bg-black text-white">
         {children}
-        <Toaster />
       </body>
     </html>
   );

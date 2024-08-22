@@ -8,7 +8,7 @@ datasource db {
 }
 
 model Form {
-  id        String     @id @unique @default(uuid())
+  id        String     @id @default(uuid())
   password  String
   data      Json
   createdAt DateTime   @default(now())
@@ -22,8 +22,9 @@ model Response {
   id        String   @id @default(cuid())
   data      Json
   createdAt DateTime @default(now())
-  Form      Form     @relation(fields: [formId], references: [id])
+  updatedAt DateTime @updatedAt
+  form      Form     @relation(fields: [formId], references: [id])
   formId    String
 
-  @@index([id])
+  @@index([formId])
 }
