@@ -2,7 +2,6 @@
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { FormStructure, FormComponent, FormComponentType, FormStyle } from '~/types/formtypes';
-import { db } from '~/server/db';
 
 const defaultFormStyle: FormStyle = {
   theme: 'light',
@@ -22,6 +21,8 @@ const defaultFormComponent: FormComponent = {
   options: [],
 };
 
+const typesWithOptions = [FormComponentType.ComboBox, FormComponentType.MultiSelect, FormComponentType.MultiChoice, FormComponentType.RadioGroup];
+
 export default function CreateFormPage() {
   const router = useRouter();
   const [formStructure, setFormStructure] = useState<FormStructure>({
@@ -33,6 +34,7 @@ export default function CreateFormPage() {
     style: defaultFormStyle,
   });
   const [password, setPassword] = useState('');
+  const [message, setMessage] = useState('');
 
   useEffect(() => {
     const savedForm = localStorage.getItem('formInProgress');
@@ -66,32 +68,79 @@ export default function CreateFormPage() {
     }));
   };
 
+  const addOption = (index: number) => {
+    setFormStructure(prev => ({
+      ...prev,
+      form_content: prev.form_content.map((component, i) =>
+        i === index
+          ? { ...component, options: [...(component.options || []), ''] }
+          : component
+      ),
+    }));
+  };
+
+  const handleOptionChange = (componentIndex: number, optionIndex: number, value: string) => {
+    setFormStructure(prev => ({
+      ...prev,
+      form_content: prev.form_content.map((component, i) =>
+        i === componentIndex
+          ? {
+            ...component,
+            options: component.options?.map((option, j) =>
+              j === optionIndex ? value : option
+            ) || [],
+          }
+          : component
+      ),
+    }));
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setMessage('');
     try {
       const formData = {
-        ...formStructure,
-        form_content: formStructure.form_content.map(component => ({
-          ...component,
-          type: component.type as string,
-        })),
-      };
-
-      await db.form.create({
         data: {
-          password,
-          data: formData as any,
+          title: formStructure.title,
+          description: formStructure.description,
+          link: formStructure.link,
+          link_description: formStructure.link_description,
+          form_content: formStructure.form_content.map(component => ({
+            ...component,
+            type: component.type as string,
+          })),
+          style: formStructure.style,
         },
+        password: password
+      };;
+
+      const response = await fetch('/api/forms', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(formData),
       });
-      localStorage.removeItem('formInProgress');
-      router.push('/forms');
+
+      const result = await response.json();
+
+      if (response.ok) {
+        console.log(JSON.stringify(formData))
+        localStorage.removeItem('formInProgress');
+        setMessage(result.message);
+        setTimeout(() => router.push('/testpage'), 2000);
+      } else {
+        setMessage(result.message);
+      }
     } catch (error) {
       console.error('Error creating form:', error);
+      setMessage('Error creating form. Please try again.');
     }
   };
 
   return (
-    <form onSubmit={handleSubmit} className="flex flex-col items-center justify-center w-1/2 space-y-4">
+    <form onSubmit={handleSubmit} className="space-y-4 text-black">
+      {message && <div className={`p-2 ${message.includes('Error') ? 'bg-red-100' : 'bg-green-100'}`}>{message}</div>}
       <input
         type="text"
         name="title"
@@ -113,7 +162,7 @@ export default function CreateFormPage() {
         name="link"
         value={formStructure.link?.toString() || ''}
         onChange={handleInputChange}
-        placeholder="Related Link"
+        placeholder="Related Link (optional)"
         className="w-full p-2 border rounded"
       />
       <input
@@ -121,7 +170,7 @@ export default function CreateFormPage() {
         name="link_description"
         value={formStructure.link_description?.toString() || ''}
         onChange={handleInputChange}
-        placeholder="Link Description"
+        placeholder="Link Description (optional)"
         className="w-full p-2 border rounded"
       />
       {formStructure.form_content.map((component, index) => (
@@ -149,13 +198,26 @@ export default function CreateFormPage() {
               <option key={type} value={type}>{type}</option>
             ))}
           </select>
-          {['ComboBox', 'MultiSelect', 'MultiChoice', 'RadioGroup'].includes(component.type) && (
-            <textarea
-              value={component.options?.join('\n') || ''}
-              onChange={(e) => handleComponentChange(index, 'options', e.target.value.split('\n'))}
-              placeholder="Options (one per line)"
-              className="w-full p-2 border rounded"
-            />
+          {typesWithOptions.includes(component.type) && (
+            <div>
+              {component.options?.map((option, optionIndex) => (
+                <input
+                  key={optionIndex}
+                  type="text"
+                  value={option}
+                  onChange={(e) => handleOptionChange(index, optionIndex, e.target.value)}
+                  placeholder={`Option ${optionIndex + 1}`}
+                  className="w-full p-2 border rounded mt-2"
+                />
+              ))}
+              <button
+                type="button"
+                onClick={() => addOption(index)}
+                className="mt-2 p-2 bg-blue-500 text-white rounded hover:bg-blue-600"
+              >
+                Add Option
+              </button>
+            </div>
           )}
         </div>
       ))}
@@ -166,11 +228,6 @@ export default function CreateFormPage() {
       >
         Add Question
       </button>
-      <label
-        htmlFor='password'
-      >
-        Please type a password that will be used to view responses on the web client.
-      </label>
       <input
         type="password"
         value={password}
