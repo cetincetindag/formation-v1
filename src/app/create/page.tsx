@@ -1,4 +1,5 @@
 "use client"
+
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { FormStructure, FormComponent, FormComponentType, FormStyle } from '~/types/formtypes';
@@ -112,7 +113,7 @@ export default function CreateFormPage() {
           style: formStructure.style,
         },
         password: password
-      };;
+      };
 
       const response = await fetch('/api/forms', {
         method: 'POST',
@@ -125,12 +126,16 @@ export default function CreateFormPage() {
       const result = await response.json();
 
       if (response.ok) {
-        console.log(JSON.stringify(formData))
-        localStorage.removeItem('formInProgress');
-        setMessage(result.message);
-        setTimeout(() => router.push('/testpage'), 2000);
+        console.log(result);
+        const { id } = result;
+        if (id) {
+          router.push(`/form-success?id=${id}`);
+          setMessage('Form Creation Successful!');
+        } else {
+          throw new Error('Form ID not returned from server');
+        }
       } else {
-        setMessage(result.message);
+        setMessage(result.message || 'Error creating form');
       }
     } catch (error) {
       console.error('Error creating form:', error);
