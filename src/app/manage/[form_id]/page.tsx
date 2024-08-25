@@ -34,7 +34,7 @@ const Page = ({ params }: PageProps) => {
     setError(null);
     try {
       const response = await fetch(
-        `/api/response?form_id=${params.form_id}&password=${passwordAttempt}&page=${currentPage}`,
+        `/api/responses?form_id=${params.form_id}&password=${passwordAttempt}&page=${currentPage}`,
       );
 
       if (response.status === 404) {
@@ -64,7 +64,7 @@ const Page = ({ params }: PageProps) => {
     } catch (error) {
       console.error("Error fetching responses:", error);
       setError(
-        `Error fetching responses: ${error instanceof Error ? error.message : String(error)}`,
+        `Error fetching responses: ${error instanceof Error ? error.message : "Unknown error"}`,
       );
       setIsAuthenticated(false);
     } finally {
@@ -74,7 +74,7 @@ const Page = ({ params }: PageProps) => {
 
   useEffect(() => {
     if (isAuthenticated) {
-      fetchResponses(password);
+      void fetchResponses(password);
     }
   }, [isAuthenticated, currentPage]);
 
