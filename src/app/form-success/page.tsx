@@ -1,10 +1,10 @@
+"use client";
+
 import React, { Suspense } from "react";
-import { useRouter } from "next/navigation";
 import { useSearchParams } from "next/navigation";
+import { useRouter } from "next/navigation";
 
 const FormSuccessContent = () => {
-  "use client";
-
   const [formLink, setFormLink] = React.useState("");
   const [copyMessage, setCopyMessage] = React.useState("");
   const router = useRouter();
