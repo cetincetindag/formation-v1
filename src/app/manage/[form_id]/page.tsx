@@ -34,7 +34,7 @@ const Page = ({ params }: PageProps) => {
     setError(null);
     try {
       const response = await fetch(
-        `/api/responses?form_id=${params.form_id}&password=${passwordAttempt}&page=${currentPage}`,
+        `/api/response?form_id=${params.form_id}&password=${passwordAttempt}&page=${currentPage}`,
       );
 
       if (response.status === 404) {
