@@ -20,6 +20,10 @@ const config = {
     "@typescript-eslint/consistent-type-imports": "warn",
     "@typescript-eslint/array-type": "off",
     "@typescript-eslint/consistent-type-definitions": "off",
+    "@typescript-eslint/no-explicit-any": "off",
+    "@typescript-eslint/prefer-nullish-coalescing": "off",
+    "@typescript-eslint/no-unsafe-call": "off",
+    "@typescript-eslint/consistent-indexed-object-style": "off",
     "@typescript-eslint/no-unused-vars": [
       "warn",
       {

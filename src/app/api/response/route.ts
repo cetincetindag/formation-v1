@@ -7,12 +7,12 @@ export async function GET(request: Request) {
     const { searchParams } = new URL(request.url);
     const formId = searchParams.get("form_id");
     const password = searchParams.get("password");
-    const page = parseInt(searchParams.get("page") || "1", 10);
+    const page = parseInt(searchParams.get("page") ?? "1", 10);
     const pageSize = 20;
 
     console.log(`Params: formId=${formId}, page=${page}`);
 
-    if (!formId || !password) {
+    if (!formId ?? !password) {
       return NextResponse.json(
         { error: "Missing form ID or password" },
         { status: 400 },
