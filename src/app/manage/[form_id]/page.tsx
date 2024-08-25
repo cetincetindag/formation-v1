@@ -5,7 +5,7 @@ import { useEffect, useState } from "react";
 
 interface Response {
   id: string;
-  createdAt: string;
+  createdAt: Date;
   data: {
     fullName?: string;
     email?: string;
@@ -139,7 +139,7 @@ const Page = ({ params }: PageProps) => {
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between gap-4">
         <h1 className="text-2xl font-bold">
           Responses for Form: {params.form_id}
         </h1>
@@ -169,14 +169,14 @@ const Page = ({ params }: PageProps) => {
           <table className="w-full border-collapse border">
             <thead>
               <tr>
-                <th className="border p-2">Date</th>
+                <th className="border p-2">Created At</th>
                 <th className="border p-2">Full Name</th>
                 <th className="border p-2">Email</th>
                 <th className="border p-2">Actions</th>
               </tr>
             </thead>
             <tbody>
-              {responses.map((response) => (
+              {responses.map((response: any) => (
                 <tr key={response.id}>
                   <td className="border p-2">
                     {new Date(response.createdAt).toLocaleString()}
@@ -206,11 +206,10 @@ const Page = ({ params }: PageProps) => {
                   <button
                     key={page}
                     onClick={() => setCurrentPage(page)}
-                    className={`rounded px-3 py-1 ${
-                      currentPage === page
-                        ? "bg-blue-500 text-white"
-                        : "bg-gray-200"
-                    }`}
+                    className={`rounded px-3 py-1 ${currentPage === page
+                      ? "bg-blue-500 text-white"
+                      : "bg-gray-200"
+                      }`}
                   >
                     {page}
                   </button>

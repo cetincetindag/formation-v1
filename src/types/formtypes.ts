@@ -2,13 +2,13 @@
 // TODO: add types  
 
 export enum FormComponentType {
-  ShortText = 'shorttext',
-  LongText = 'longtext',
-  ComboBox = 'combobox',
-  MultiSelect = 'multiselect',
-  MultiChoice = 'multichoice',
-  RadioGroup = 'radiogroup',
-  Slider = 'slider'
+  ShortText = 'Short Text',
+  LongText = 'Long Text',
+  ComboBox = 'Combo Box',
+  MultiSelect = 'Multi Select',
+  MultiChoice = 'Multi Choice',
+  RadioGroup = 'Radio Group',
+  Slider = 'Slider'
 }
 
 
