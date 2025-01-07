@@ -15,7 +15,6 @@ model Form {
   updatedAt DateTime   @updatedAt
   responses Response[]
 
-  @@index([id])
 }
 
 model Response {

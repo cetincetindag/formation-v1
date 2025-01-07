@@ -1,37 +1,63 @@
-"use client"
+"use client";
 
-import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { useRouter } from "next/navigation";
+import { Card } from "~/components/ui/card";
+import { Input } from "~/components/ui/input";
+import { Button } from "~/components/ui/button";
+import { toast } from "sonner";
 
-const Page = () => {
-  const [formId, setFormId] = useState('')
-  const router = useRouter()
+export default function ManagePage() {
+  const router = useRouter();
+  const [formUrl, setFormUrl] = useState("");
+  const [password, setPassword] = useState("");
 
-  const handleSubmit = () => {
-    if (formId) {
-      router.push(`/manage/${formId}`)
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    try {
+      const response = await fetch("/api/forms", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ formUrl, password }),
+      });
+
+      if (response.ok) {
+        router.push(`/manage/dashboard/${formUrl}`);
+      } else {
+        toast.error("Invalid credentials");
+      }
+    } catch (error) {
+      toast.error("An error occurred");
     }
-  }
+  };
 
   return (
-    <div className="flex flex-col gap-2 m-4 text-black">
-      <input
-        type="text"
-        required
-        value={formId}
-        onChange={(e) => setFormId(e.target.value)}
-        placeholder="Form ID or link"
-        className="px-1 py-2 border rounded"
-      />
-      <button
-        type="button"
-        onClick={handleSubmit}
-        className="px-4 py-2 text-white border rounded-lg bg-blue-500 hover:bg-blue-600"
-      >
-        Go to Form Management
-      </button>
+    <div className="container mx-auto px-4 py-8">
+      <Card className="mx-auto max-w-md p-6">
+        <h1 className="mb-6 text-2xl font-bold">Manage Form</h1>
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div>
+            <Input
+              placeholder="Form URL"
+              value={formUrl}
+              onChange={(e: any) => setFormUrl(e.target.value)}
+              required
+            />
+          </div>
+          <div>
+            <Input
+              type="password"
+              placeholder="Form Password"
+              value={password}
+              onChange={(e: any) => setPassword(e.target.value)}
+              required
+            />
+          </div>
+          <Button type="submit" className="w-full">
+            Access Dashboard
+          </Button>
+        </form>
+      </Card>
     </div>
-  )
-};
-
-export default Page;
+  );
+}
