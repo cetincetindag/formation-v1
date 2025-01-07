@@ -60,13 +60,19 @@ export default function Component() {
             transition={{ duration: 0.5, delay: 0.6 }}
           >
             <Link href="/create">
-              <Button size="lg" className="animate-pulse bg-blue-500 hover:bg-blue-600">Get Started</Button>
+              <Button size="lg" className="bg-blue-500 hover:bg-blue-600">Get Started</Button>
             </Link>
           </motion.div>
         </section>
 
         <section id="features" className="mb-16">
-          <h3 className="text-2xl font-semibold mb-8 text-center">Why Choose Formation?</h3>
+          <motion.h3
+            className="text-2xl font-semibold mb-8 text-center"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.4 }}>
+            Why Choose Formation?
+          </motion.h3>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             {[
               { icon: <FileText className="h-8 w-8 mb-4" />, title: "Easy to Use", description: "Intuitive drag-and-drop interface for quick form creation." },
@@ -92,7 +98,13 @@ export default function Component() {
         </section>
 
         <section id="pricing" className="mb-16">
-          <h3 className="text-2xl font-semibold mb-8 text-center">Simple Pricing</h3>
+          <motion.h3
+            className="text-2xl font-semibold mb-8 text-center"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.4 }}>
+            Simple Pricing
+          </motion.h3>
           <motion.div
             initial={{ opacity: 0, scale: 0.8 }}
             animate={{ opacity: 1, scale: 1 }}
@@ -101,13 +113,18 @@ export default function Component() {
             <Card className="max-w-md mx-auto">
               <CardContent className="p-6">
                 <h4 className="text-2xl font-bold mb-4">Pro Plan</h4>
-                <p className="text-4xl font-bold mb-4">$19<span className="text-xl text-muted-foreground">/month</span></p>
+                <p className="text-4xl font-bold mb-4">
+                  Coming Soon
+                  <span className="text-xl text-muted-foreground">
+                    {/* /month */}
+                  </span>
+                </p>
                 <ul className="mb-6 space-y-2">
                   <li className="flex items-center"><CheckCircle className="h-5 w-5 mr-2 text-green-500" /> Unlimited Forms</li>
                   <li className="flex items-center"><CheckCircle className="h-5 w-5 mr-2 text-green-500" /> Advanced Analytics</li>
                   <li className="flex items-center"><CheckCircle className="h-5 w-5 mr-2 text-green-500" /> Custom Branding</li>
                 </ul>
-                <Button className="w-full">Start Free Trial</Button>
+                {/* <Button className="w-full">Subscribe</Button> */}
               </CardContent>
             </Card>
           </motion.div>
@@ -136,7 +153,7 @@ export default function Component() {
 
       <footer className="bg-muted mt-16 py-8">
         <div className="container mx-auto px-4 text-center text-muted-foreground">
-          <p>&copy; 2023 Formation. All rights reserved.</p>
+          <p>&copy; {new Date().getFullYear()} Formation. All rights reserved.</p>
         </div>
       </footer>
 

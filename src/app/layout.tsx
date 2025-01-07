@@ -2,6 +2,7 @@ import "~/styles/globals.css";
 import { GeistSans } from "geist/font/sans";
 
 import { type Metadata } from "next";
+import { Toaster } from "~/components/ui/toaster";
 
 export const metadata: Metadata = {
   title: "Formation",
@@ -16,10 +17,11 @@ export default function RootLayout({
       <body className="flex flex-col justify-center items-center bg-black text-white">
         <div>
           <h1 className="text-lg text-white">
-            formation - development build v2.3
+            formation - development build v3.1
           </h1>
         </div>
         {children}
+        <Toaster />
       </body>
     </html>
   );

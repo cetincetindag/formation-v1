@@ -15,7 +15,7 @@ import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, For
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "~/components/ui/tabs"
 import { ScrollArea } from "~/components/ui/scroll-area"
 import { Separator } from "~/components/ui/separator"
-import { Plus, Trash2, Link as LinkIcon } from 'lucide-react'
+import { Plus, Trash2 } from 'lucide-react'
 import { toast } from "~/components/ui/use-toast"
 
 const defaultFormStyle: FormStyle = {
@@ -28,6 +28,7 @@ const defaultFormStyle: FormStyle = {
   q_cardcolor: '#f0f0f0',
 }
 
+
 const defaultFormComponent: FormComponent = {
   index: 0,
   title: '',
@@ -38,13 +39,24 @@ const defaultFormComponent: FormComponent = {
 
 const typesWithOptions = [FormComponentType.ComboBox, FormComponentType.MultiSelect, FormComponentType.MultiChoice, FormComponentType.RadioGroup]
 
+const styleSchema = z.object({
+  theme: z.enum(["light", "dark"]).default("light"),
+  h_font: z.string().min(1, "Header font is required"),
+  h_txtcolor: z.string().regex(/^#([0-9A-F]{3}){1,2}$/i, "Invalid color code"),
+  h_cardcolor: z.string().regex(/^#([0-9A-F]{3}){1,2}$/i, "Invalid color code"),
+  q_font: z.string().min(1, "Question font is required"),
+  q_txtcolor: z.string().regex(/^#([0-9A-F]{3}){1,2}$/i, "Invalid color code"),
+  q_cardcolor: z.string().regex(/^#([0-9A-F]{3}){1,2}$/i, "Invalid color code"),
+});
+
 const formSchema = z.object({
   title: z.string().min(1, "Title is required"),
   description: z.string().nullable(),
-  link: z.string().url().nullable(),
+  link: z.string().url("Invalid URL").nullable(),
   link_description: z.string().nullable(),
   password: z.string().min(6, "Password must be at least 6 characters"),
-})
+  style: styleSchema,
+});
 
 export default function CreateFormPage() {
   const router = useRouter()
@@ -326,7 +338,7 @@ export default function CreateFormPage() {
                   </Button>
                 </TabsContent>
                 <TabsContent value="style" className="space-y-4">
-                  {/* Add style customization fields here */}
+                  {/* style customization fields will go here ... */}
                   <FormField
                     control={form.control}
                     name="style.theme"
@@ -352,7 +364,7 @@ export default function CreateFormPage() {
                 </TabsContent>
               </Tabs>
             </CardContent>
-          </Card>
+          </Card >
           <Card>
             <CardContent className="pt-6">
               <FormField
@@ -374,8 +386,8 @@ export default function CreateFormPage() {
             </CardContent>
           </Card>
           <Button type="submit" className="w-full">Create Form</Button>
-        </form>
-      </Form>
-    </div>
+        </form >
+      </Form >
+    </div >
   )
 }
