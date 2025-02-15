@@ -12,7 +12,8 @@ export enum FormComponentType {
 }
 
 export type queryParams = {
-
+  formId: string;
+  password: string;
 }
 
 

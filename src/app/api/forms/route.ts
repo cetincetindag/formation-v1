@@ -1,7 +1,6 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { db } from "~/server/db";
 
-// Utility function for password validation
 async function validateFormPassword(formId: string, password: string) {
   const form = await db.form.findUnique({
     where: { id: formId },
@@ -13,19 +12,18 @@ async function validateFormPassword(formId: string, password: string) {
   return form;
 }
 
-export async function GET(request: Request) {
+export async function GET(request: NextRequest) {
   try {
-    const { searchParams } = new URL(request.url);
+    const searchParams = request.nextUrl.searchParams;
     const formId = searchParams.get("form_id");
     const password = searchParams.get("password");
     const page = parseInt(searchParams.get("page") || "1");
-    const pageSize = 10;
+    const pageSize = 10 as const;
 
     if (!formId) {
       return NextResponse.json({ error: "Missing form ID" }, { status: 400 });
     }
 
-    // If password is provided, fetch responses (management view)
     if (password) {
       const form = await validateFormPassword(formId, password);
       if (!form) {
@@ -35,11 +33,8 @@ export async function GET(request: Request) {
         );
       }
 
-      const totalResponses = await db.response.count({
-        where: { formId },
-      });
+      const totalResponses = await db.response.count({ where: { formId } });
 
-      // Get paginated responses
       const responses = await db.response.findMany({
         where: { formId },
         skip: (page - 1) * pageSize,
@@ -55,7 +50,6 @@ export async function GET(request: Request) {
       });
     }
 
-    // If no password provided, just return form details
     const form = await db.form.findUnique({
       where: { id: formId },
     });
@@ -78,7 +72,6 @@ export async function POST(request: Request) {
   try {
     const data = await request.json();
 
-    // Handle form response submission
     if (data.formId && data.data) {
       const newResponse = await db.response.create({
         data: {
@@ -121,4 +114,3 @@ export async function POST(request: Request) {
   }
 }
 
-// Keep the DELETE method as is...
