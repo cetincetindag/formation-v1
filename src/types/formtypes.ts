@@ -11,27 +11,12 @@ export enum FormComponentType {
   Slider = "Slider",
 }
 
-export interface FormStyle {
-  theme: string;
-  h_font: string;
-  h_txtcolor: string;
-  h_cardcolor: string;
-  q_font: string;
-  q_txtcolor: string;
-  q_cardcolor: string;
+export type queryParams = {
+
 }
 
-export const defaultFormStyle: FormStyle = {
-  theme: "light",
-  h_font: "Arial",
-  h_txtcolor: "#000000",
-  h_cardcolor: "#ffffff",
-  q_font: "Arial",
-  q_txtcolor: "#000000",
-  q_cardcolor: "#f0f0f0",
-};
 
-export interface FormComponent {
+export type FormComponent = {
   index: number;
   title: string;
   description: string | null;
@@ -39,11 +24,10 @@ export interface FormComponent {
   options?: string[];
 }
 
-export interface FormStructure {
+export type FormStructure = {
   title: string;
   description: string | null;
   link?: string | URL | null;
   link_description?: string | null | URL;
   form_content: FormComponent[];
-  style: FormStyle;
 }

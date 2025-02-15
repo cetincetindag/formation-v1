@@ -4,7 +4,6 @@ import Link from "next/link";
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { Button } from "~/components/ui/button";
-import { Input } from "~/components/ui/input";
 import { Card, CardContent } from "~/components/ui/card";
 import { CheckCircle, FileText, Zap } from "lucide-react";
 
@@ -32,9 +31,7 @@ export default function Component() {
                 <a
                   href="/contact"
                   className="text-muted-foreground hover:text-primary transition-colors"
-                >
-                  Contact Us
-                </a>
+                > Contact Us </a>
               </li>
             </ul>
           </nav>

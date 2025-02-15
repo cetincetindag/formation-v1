@@ -15,7 +15,7 @@ const applyQuestionStyles = (style: FormStyle) => ({
 });
 
 export const FormRenderer: React.FC<{ formData: FormStructure }> = ({ formData }) => {
-  const { title, description, link, link_description, form_content, style } = formData;
+  const { title, description, link, link_description, form_content  } = formData;
 
   const renderLinkDescription = () => {
     if (typeof link_description === 'string') {
