@@ -1,5 +1,4 @@
 import { Card } from "~/components/ui/card";
-import { Button } from "~/components/ui/button";
 
 export default function ContactPage() {
   return (
@@ -9,7 +8,7 @@ export default function ContactPage() {
         <div className="space-y-4">
           <div>
             <h2 className="mb-2 text-xl font-semibold">Cetin Cetindag</h2>
-            <p className="text-muted-foreground">Founder, Dapple Studios</p>
+            <p className="text-muted-foreground">Lead Developer, Dapple Studios</p>
           </div>
           <div>
             <h3 className="mb-1 font-medium">Email</h3>
@@ -19,11 +18,6 @@ export default function ContactPage() {
             <h3 className="mb-1 font-medium">Location</h3>
             <p className="text-muted-foreground">Izmir, Turkiye</p>
           </div>
-          {/*
-          <div className="pt-4">
-              <Button className="w-full">Send Message</Button> 
-          </div>
-          */}
         </div>
       </Card>
     </div>

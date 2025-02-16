@@ -32,23 +32,23 @@ const Page = () => {
   };
 
   return (
-    <div className="p-4">
+    <div className="p-4 text-white">
       <h1 className="text-lg font-bold mb-4">Test Form Fetch</h1>
       <input
         type="text"
         placeholder="Enter Form ID"
         value={formId}
         onChange={(e) => setFormId(e.target.value)}
-        className="border p-2 rounded w-full"
+        className="border p-2 rounded w-full bg-white text-black"
       />
-      <button onClick={fetchForm} className="mt-2 p-2 bg-blue-500 text-white rounded">
+      <button onClick={fetchForm} className="mt-2 p-2 bg-black text-white rounded">
         Fetch Form
       </button>
 
       {error && <p className="text-red-500 mt-2">{error}</p>}
 
       {formData && (
-        <pre className="bg-gray-100 p-4 mt-4 rounded text-sm">
+        <pre className="bg-black text-white p-4 mt-4 rounded text-sm">
           {JSON.stringify(formData, null, 2)}
         </pre>
       )}

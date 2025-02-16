@@ -6,8 +6,6 @@ import {
   FormStructure,
   FormComponent,
   FormComponentType,
-  FormStyle,
-  defaultFormStyle,
 } from "~/types/formtypes";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -53,15 +51,6 @@ const typesWithOptions = [
   FormComponentType.RadioGroup,
 ];
 
-const styleSchema = z.object({
-  theme: z.string(),
-  h_font: z.string().min(1, "Header font is required"),
-  h_txtcolor: z.string().regex(/^#([0-9A-F]{3}){1,2}$/i, "Invalid color code"),
-  h_cardcolor: z.string().regex(/^#([0-9A-F]{3}){1,2}$/i, "Invalid color code"),
-  q_font: z.string().min(1, "Question font is required"),
-  q_txtcolor: z.string().regex(/^#([0-9A-F]{3}){1,2}$/i, "Invalid color code"),
-  q_cardcolor: z.string().regex(/^#([0-9A-F]{3}){1,2}$/i, "Invalid color code"),
-});
 
 const formSchema = z.object({
   title: z.string().min(1, "Title is required"),
@@ -69,7 +58,6 @@ const formSchema = z.object({
   link: z.string().url("Invalid URL").nullable(),
   link_description: z.string().nullable(),
   password: z.string().min(6, "Password must be at least 6 characters"),
-  style: styleSchema,
 });
 
 export default function EditFormPage({
@@ -84,7 +72,6 @@ export default function EditFormPage({
     link: null,
     link_description: null,
     form_content: [{ ...defaultFormComponent }],
-    style: defaultFormStyle as FormStyle,
   });
 
   const form = useForm<z.infer<typeof formSchema>>({
@@ -95,7 +82,6 @@ export default function EditFormPage({
       link: null,
       link_description: null,
       password: "",
-      style: defaultFormStyle as FormStyle,
     },
   });
 
@@ -111,7 +97,6 @@ export default function EditFormPage({
             description: data.description,
             link: data.link,
             link_description: data.link_description,
-            style: data.style as FormStyle,
             password: "",
           });
         } else {
@@ -185,12 +170,12 @@ export default function EditFormPage({
       form_content: prev.form_content.map((component, i) =>
         i === componentIndex
           ? {
-              ...component,
-              options:
-                component.options?.map((option, j) =>
-                  j === optionIndex ? value : option,
-                ) || [],
-            }
+            ...component,
+            options:
+              component.options?.map((option, j) =>
+                j === optionIndex ? value : option,
+              ) || [],
+          }
           : component,
       ),
     }));
@@ -205,7 +190,6 @@ export default function EditFormPage({
           description: values.description,
           link: values.link,
           link_description: values.link_description,
-          style: values.style as FormStyle,
           form_content: formStructure.form_content.map((component) => ({
             ...component,
             type: component.type,
@@ -422,32 +406,6 @@ export default function EditFormPage({
                   >
                     <Plus className="mr-2 h-4 w-4" /> Add Question
                   </Button>
-                </TabsContent>
-                <TabsContent value="style" className="space-y-4">
-                  <FormField
-                    control={form.control}
-                    name="style.theme"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Theme</FormLabel>
-                        <Select
-                          onValueChange={field.onChange}
-                          defaultValue={field.value}
-                        >
-                          <FormControl>
-                            <SelectTrigger>
-                              <SelectValue placeholder="Select a theme" />
-                            </SelectTrigger>
-                          </FormControl>
-                          <SelectContent>
-                            <SelectItem value="light">Light</SelectItem>
-                            <SelectItem value="dark">Dark</SelectItem>
-                          </SelectContent>
-                        </Select>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
                 </TabsContent>
               </Tabs>
             </CardContent>

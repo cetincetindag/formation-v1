@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
-import { FormStructure, FormComponent, FormComponentType, FormStyle } from '~/types/formtypes'
+import { FormStructure, FormComponent, FormComponentType } from '~/types/formtypes'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import * as z from 'zod'
@@ -18,15 +18,6 @@ import { Separator } from "~/components/ui/separator"
 import { Plus, Trash2 } from 'lucide-react'
 import { toast } from "~/components/ui/use-toast"
 
-const defaultFormStyle: FormStyle = {
-  theme: 'light',
-  h_font: 'Arial',
-  h_txtcolor: '#000000',
-  h_cardcolor: '#ffffff',
-  q_font: 'Arial',
-  q_txtcolor: '#000000',
-  q_cardcolor: '#f0f0f0',
-}
 
 
 const defaultFormComponent: FormComponent = {
@@ -39,15 +30,6 @@ const defaultFormComponent: FormComponent = {
 
 const typesWithOptions = [FormComponentType.ComboBox, FormComponentType.MultiSelect, FormComponentType.MultiChoice, FormComponentType.RadioGroup]
 
-const styleSchema = z.object({
-  theme: z.enum(["light", "dark"]).default("light"),
-  h_font: z.string().min(1, "Header font is required"),
-  h_txtcolor: z.string().regex(/^#([0-9A-F]{3}){1,2}$/i, "Invalid color code"),
-  h_cardcolor: z.string().regex(/^#([0-9A-F]{3}){1,2}$/i, "Invalid color code"),
-  q_font: z.string().min(1, "Question font is required"),
-  q_txtcolor: z.string().regex(/^#([0-9A-F]{3}){1,2}$/i, "Invalid color code"),
-  q_cardcolor: z.string().regex(/^#([0-9A-F]{3}){1,2}$/i, "Invalid color code"),
-});
 
 const formSchema = z.object({
   title: z.string().min(1, "Title is required"),
@@ -55,7 +37,6 @@ const formSchema = z.object({
   link: z.string().url("Invalid URL").nullable(),
   link_description: z.string().nullable(),
   password: z.string().min(6, "Password must be at least 6 characters"),
-  style: styleSchema,
 });
 
 export default function CreateFormPage() {
@@ -66,7 +47,6 @@ export default function CreateFormPage() {
     link: null,
     link_description: null,
     form_content: [{ ...defaultFormComponent }],
-    style: defaultFormStyle,
   })
 
   const form = useForm<z.infer<typeof formSchema>>({
@@ -147,9 +127,9 @@ export default function CreateFormPage() {
       ),
     }))
   }
-
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     try {
+      console.log('Form Values:', values);
       const formData = {
         data: {
           ...formStructure,
@@ -162,8 +142,9 @@ export default function CreateFormPage() {
             type: component.type as string,
           })),
         },
-        password: values.password
-      }
+        password: values.password,
+      };
+      console.log('Form Data to be sent:', formData);
 
       const response = await fetch('/api/forms', {
         method: 'POST',
@@ -171,34 +152,35 @@ export default function CreateFormPage() {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify(formData),
-      })
+      });
 
-      const result = await response.json()
+      const result = await response.json();
+      console.log('API Response:', result);
 
       if (response.ok) {
-        console.log(result)
-        const { id } = result
+        console.log('Form created successfully:', result);
+        const { id } = result;
         if (id) {
-          router.push(`/form-success?id=${id}`)
+          router.push(`/form-success?id=${id}`);
           toast({
             title: "Success",
             description: "Form created successfully!",
-          })
+          });
         } else {
-          throw new Error('Form ID not returned from server')
+          throw new Error('Form ID not returned from server');
         }
       } else {
-        throw new Error(result.message || 'Error creating form')
+        throw new Error(result.message || 'Error creating form');
       }
     } catch (error) {
-      console.error('Error creating form:', error)
+      console.error('Error creating form:', error);
       toast({
         title: "Error",
         description: "Error creating form. Please try again.",
         variant: "destructive",
-      })
+      });
     }
-  }
+  };
 
   return (
     <div className="w-2/3">
@@ -212,7 +194,6 @@ export default function CreateFormPage() {
               <Tabs defaultValue="content">
                 <TabsList>
                   <TabsTrigger value="content">Form Content</TabsTrigger>
-                  <TabsTrigger value="style">Style Settings</TabsTrigger>
                 </TabsList>
                 <TabsContent value="content" className="space-y-4">
                   <FormField
@@ -336,31 +317,6 @@ export default function CreateFormPage() {
                   <Button type="button" onClick={addFormComponent} className="w-full">
                     <Plus className="mr-2 h-4 w-4" /> Add Question
                   </Button>
-                </TabsContent>
-                <TabsContent value="style" className="space-y-4">
-                  {/* style customization fields will go here ... */}
-                  <FormField
-                    control={form.control}
-                    name="style.theme"
-                    render={({ field }: { field: any }) => (
-                      <FormItem>
-                        <FormLabel>Theme</FormLabel>
-                        <Select onValueChange={field.onChange} defaultValue={field.value}>
-                          <FormControl>
-                            <SelectTrigger>
-                              <SelectValue placeholder="Select a theme" />
-                            </SelectTrigger>
-                          </FormControl>
-                          <SelectContent>
-                            <SelectItem value="light">Light</SelectItem>
-                            <SelectItem value="dark">Dark</SelectItem>
-                          </SelectContent>
-                        </Select>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  {/* Add more style fields here */}
                 </TabsContent>
               </Tabs>
             </CardContent>

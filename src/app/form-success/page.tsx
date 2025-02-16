@@ -1,16 +1,16 @@
 "use client";
 
-import React, { Suspense } from "react";
+import { useEffect, useState, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import { useRouter } from "next/navigation";
 
 const FormSuccessContent = () => {
-  const [formLink, setFormLink] = React.useState("");
-  const [copyMessage, setCopyMessage] = React.useState("");
+  const [formLink, setFormLink] = useState("");
+  const [copyMessage, setCopyMessage] = useState("");
   const router = useRouter();
   const searchParams = useSearchParams();
 
-  React.useEffect(() => {
+  useEffect(() => {
     const formId = searchParams.get("id");
     if (formId) {
       setFormLink(`${window.location.origin}/view/${formId}`);

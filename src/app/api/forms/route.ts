@@ -70,47 +70,24 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: Request) {
   try {
-    const data = await request.json();
+    const requestData = await request.json();
 
-    if (data.formId && data.data) {
-      const newResponse = await db.response.create({
-        data: {
-          formId: data.formId,
-          data: data.data,
-        },
-      });
-      return NextResponse.json(newResponse, { status: 201 });
-    }
-
-    // Handle form creation
-    if (data.title) {
+    // Check if the request is for creating a form
+    if (requestData.data && requestData.password) {
       const newForm = await db.form.create({
-        data: data,
+        data: {
+          data: requestData.data, // Pass the entire data object
+          password: requestData.password,
+        },
       });
       return NextResponse.json(newForm, { status: 201 });
     }
 
-    // Handle password validation
-    if (data.formUrl && data.password) {
-      const form = await validateFormPassword(data.formUrl, data.password);
-      if (!form) {
-        return NextResponse.json(
-          { error: "Invalid credentials" },
-          { status: 403 },
-        );
-      }
-      return NextResponse.json({
-        success: true,
-        token: Buffer.from(`${data.formUrl}:${data.password}`).toString(
-          "base64",
-        ), // Simple token generation
-      });
-    }
-
+    // If the required fields are missing, return an error
+    console.log("Invalid request data:", requestData);
     return NextResponse.json({ error: "Invalid request" }, { status: 400 });
   } catch (error) {
     console.error("Error:", error);
     return NextResponse.json({ error: "Server error" }, { status: 500 });
   }
 }
-
