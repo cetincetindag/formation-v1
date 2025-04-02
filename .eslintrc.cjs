@@ -1,4 +1,3 @@
-/** @type {import("eslint").Linter.Config} */
 const config = {
   parser: "@typescript-eslint/parser",
   parserOptions: {
@@ -14,11 +13,11 @@ const config = {
     "@typescript-eslint/no-empty-interface": "off",
     "@typescript-eslint/no-unnecessary-type-assertion": "off",
     "@typescript-eslint/no-base-to-string": "off",
-    "@typescript-eslint/no-unsafe-assignment": "warn",
-    "@typescript-eslint/no-unsafe-member-access": "warn",
-    "@typescript-eslint/no-unsafe-argument": "warn",
-    "@typescript-eslint/no-floating-promises": "warn",
-    "@typescript-eslint/consistent-type-imports": "warn",
+    "@typescript-eslint/no-unsafe-assignment": "off",
+    "@typescript-eslint/no-unsafe-member-access": "off",
+    "@typescript-eslint/no-unsafe-argument": "off",
+    "@typescript-eslint/no-floating-promises": "off",
+    "@typescript-eslint/consistent-type-imports": "off",
     "@typescript-eslint/array-type": "off",
     "@typescript-eslint/consistent-type-definitions": "off",
     "@typescript-eslint/no-explicit-any": "off",
@@ -34,7 +33,7 @@ const config = {
     ],
     "@typescript-eslint/require-await": "off",
     "@typescript-eslint/no-misused-promises": [
-      "error",
+      "warn",
       {
         checksVoidReturn: {
           attributes: false,

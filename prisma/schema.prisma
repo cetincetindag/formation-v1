@@ -8,13 +8,12 @@ datasource db {
 }
 
 model Form {
-  id        String     @id @default(uuid())
+  id        String     @id @default("custom_id") // Custom ID will be overridden by nanoid in code
   password  String
   data      Json 
   createdAt DateTime   @default(now())
   updatedAt DateTime   @updatedAt
   responses Response[]
-
 }
 
 model Response {

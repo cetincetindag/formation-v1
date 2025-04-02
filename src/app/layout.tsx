@@ -1,8 +1,7 @@
 import "~/styles/globals.css";
 import { GeistSans } from "geist/font/sans";
-
 import { type Metadata } from "next";
-import { Toaster } from "~/components/ui/toaster";
+import { Toaster } from "sonner";
 
 export const metadata: Metadata = {
   title: "Formation",
@@ -13,9 +12,11 @@ export default function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang="en" className={`${GeistSans.variable}`}>
-      <body className="flex flex-col items-center justify-center bg-black p-4 text-white">
-        {children}
+    <html lang="en" className={GeistSans.variable}>
+      <body className="bg-background min-h-screen font-sans antialiased">
+        <div className="relative flex min-h-screen flex-col">
+          <div className="flex-1">{children}</div>
+        </div>
         <Toaster />
       </body>
     </html>

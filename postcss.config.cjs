@@ -3,5 +3,4 @@ const config = {
     tailwindcss: {},
   },
 };
-
 module.exports = config;

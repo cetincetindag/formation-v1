@@ -1,15 +1,12 @@
 "use client";
-
 import { useEffect, useState, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import { useRouter } from "next/navigation";
-
 const FormSuccessContent = () => {
   const [formLink, setFormLink] = useState("");
   const [copyMessage, setCopyMessage] = useState("");
   const router = useRouter();
   const searchParams = useSearchParams();
-
   useEffect(() => {
     const formId = searchParams.get("id");
     if (formId) {
@@ -18,7 +15,6 @@ const FormSuccessContent = () => {
       router.push("/");
     }
   }, [router, searchParams]);
-
   const copyToClipboard = async () => {
     try {
       await navigator.clipboard.writeText(formLink);
@@ -28,7 +24,6 @@ const FormSuccessContent = () => {
       console.error("Failed to copy text: ", err);
     }
   };
-
   return (
     <div className="flex min-h-screen w-2/3 flex-col items-center justify-center bg-black">
       <div className="w-full rounded-lg bg-black p-8 shadow-md">
@@ -65,7 +60,6 @@ const FormSuccessContent = () => {
     </div>
   );
 };
-
 export default function FormSuccessPage() {
   return (
     <Suspense fallback={<div>Loading...</div>}>

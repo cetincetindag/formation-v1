@@ -1,6 +1,3 @@
-// Those are the types of data that the API will expect on a call
-// TODO: add types
-
 export enum FormComponentType {
   ShortText = "Short Text",
   LongText = "Long Text",
@@ -10,25 +7,24 @@ export enum FormComponentType {
   RadioGroup = "Radio Group",
   Slider = "Slider",
 }
-
 export type queryParams = {
   formId: string;
   password: string;
-}
-
-
+};
 export type FormComponent = {
   index: number;
   title: string;
   description: string | null;
   type: FormComponentType;
   options?: string[];
-}
-
+  min?: number; 
+  max?: number; 
+  default?: number; 
+};
 export type FormStructure = {
   title: string;
   description: string | null;
   link?: string | URL | null;
   link_description?: string | null | URL;
   form_content: FormComponent[];
-}
+};

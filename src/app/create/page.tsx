@@ -1,135 +1,243 @@
-"use client"
-
-import React, { useState, useEffect } from 'react'
-import { useRouter } from 'next/navigation'
-import { FormStructure, FormComponent, FormComponentType } from '~/types/formtypes'
-import { useForm } from 'react-hook-form'
-import { zodResolver } from '@hookform/resolvers/zod'
-import * as z from 'zod'
-import { Button } from "~/components/ui/button"
-import { Input } from "~/components/ui/input"
-import { Textarea } from "~/components/ui/textarea"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "~/components/ui/select"
-import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card"
-import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "~/components/ui/form"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "~/components/ui/tabs"
-import { ScrollArea } from "~/components/ui/scroll-area"
-import { Separator } from "~/components/ui/separator"
-import { Plus, Trash2 } from 'lucide-react'
-import { toast } from "~/components/ui/use-toast"
-
-
-
+"use client";
+import React, { useState, useEffect, useRef } from "react";
+import { useRouter } from "next/navigation";
+import {
+  FormStructure,
+  FormComponent,
+  FormComponentType,
+} from "~/types/formtypes";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import * as z from "zod";
+import { Button } from "~/components/ui/button";
+import { Input } from "~/components/ui/input";
+import { Textarea } from "~/components/ui/textarea";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "~/components/ui/select";
+import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
+import {
+  Form,
+  FormControl,
+  FormDescription,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "~/components/ui/form";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "~/components/ui/tabs";
+import { ScrollArea } from "~/components/ui/scroll-area";
+import { Separator } from "~/components/ui/separator";
+import {
+  Plus,
+  Trash2,
+  Type,
+  AlignLeft,
+  List,
+  CheckSquare,
+  Check,
+  CircleDot,
+  Sliders,
+  X,
+  ArrowUp,
+  ArrowDown,
+} from "lucide-react";
+import { toast } from "~/components/ui/use-toast";
+import { Label } from "~/components/ui/label";
 const defaultFormComponent: FormComponent = {
   index: 0,
-  title: '',
-  description: null,
+  title: "",
+  description: "",
   type: FormComponentType.ShortText,
   options: [],
-}
-
-const typesWithOptions = [FormComponentType.ComboBox, FormComponentType.MultiSelect, FormComponentType.MultiChoice, FormComponentType.RadioGroup]
-
-
+};
+const typesWithOptions = [
+  FormComponentType.ComboBox,
+  FormComponentType.MultiSelect,
+  FormComponentType.MultiChoice,
+  FormComponentType.RadioGroup,
+];
 const formSchema = z.object({
   title: z.string().min(1, "Title is required"),
   description: z.string().nullable(),
-  link: z.string().url("Invalid URL").nullable(),
+  link: z.string().url("Invalid URL").nullish().or(z.literal("")),
   link_description: z.string().nullable(),
   password: z.string().min(6, "Password must be at least 6 characters"),
 });
-
 export default function CreateFormPage() {
-  const router = useRouter()
+  const router = useRouter();
+  const scrollAreaRef = useRef<HTMLDivElement>(null);
   const [formStructure, setFormStructure] = useState<FormStructure>({
-    title: '',
-    description: null,
-    link: null,
-    link_description: null,
+    title: "",
+    description: "",
+    link: "",
+    link_description: "",
     form_content: [{ ...defaultFormComponent }],
-  })
-
+  });
+  const [focusTarget, setFocusTarget] = useState<{
+    componentIndex: number;
+    optionIndex: number;
+  } | null>(null);
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      title: '',
-      description: '',
-      link: '',
-      link_description: '',
-      password: '',
+      title: "",
+      description: "",
+      link: "",
+      link_description: "",
+      password: "",
     },
-  })
-
+  });
   useEffect(() => {
-    const savedForm = localStorage.getItem('formInProgress')
+    const savedForm = localStorage.getItem("formInProgress");
     if (savedForm) {
-      const parsedForm = JSON.parse(savedForm)
-      setFormStructure(parsedForm)
+      const parsedForm = JSON.parse(savedForm);
+      setFormStructure(parsedForm);
       form.reset({
         title: parsedForm.title,
         description: parsedForm.description,
         link: parsedForm.link,
         link_description: parsedForm.link_description,
-      })
+      });
     }
-  }, [])
-
+  }, []);
   useEffect(() => {
-    localStorage.setItem('formInProgress', JSON.stringify(formStructure))
-  }, [formStructure])
-
-  const handleComponentChange = (index: number, field: keyof FormComponent, value: any) => {
-    setFormStructure(prev => ({
+    localStorage.setItem("formInProgress", JSON.stringify(formStructure));
+  }, [formStructure]);
+  useEffect(() => {
+    if (focusTarget) {
+      const targetId = `option-input-${focusTarget.componentIndex}-${focusTarget.optionIndex}`;
+      const targetElement = document.getElementById(targetId);
+      if (targetElement) {
+        targetElement.focus();
+      }
+      setFocusTarget(null);
+    }
+  }, [focusTarget, formStructure.form_content]);
+  const handleComponentChange = (
+    index: number,
+    field: keyof FormComponent,
+    value: any,
+  ) => {
+    setFormStructure((prev) => ({
       ...prev,
       form_content: prev.form_content.map((component, i) =>
-        i === index ? { ...component, [field]: value } : component
+        i === index ? { ...component, [field]: value } : component,
       ),
-    }))
-  }
-
+    }));
+  };
   const addFormComponent = () => {
-    setFormStructure(prev => ({
+    setFormStructure((prev) => ({
       ...prev,
-      form_content: [...prev.form_content, { ...defaultFormComponent, index: prev.form_content.length }],
-    }))
-  }
-
+      form_content: [
+        ...prev.form_content,
+        { ...defaultFormComponent, index: prev.form_content.length },
+      ],
+    }));
+    setTimeout(() => {
+      const viewport = scrollAreaRef.current?.querySelector<HTMLDivElement>(
+        "[data-radix-scroll-area-viewport]",
+      );
+      if (viewport) {
+        viewport.scrollTop = viewport.scrollHeight;
+      } else if (scrollAreaRef.current) {
+        scrollAreaRef.current.scrollTop = scrollAreaRef.current.scrollHeight;
+      }
+    }, 0);
+  };
   const deleteFormComponent = (index: number) => {
-    setFormStructure(prev => ({
+    setFormStructure((prev) => ({
       ...prev,
       form_content: prev.form_content.filter((_, i) => i !== index),
-    }))
-  }
-
+    }));
+  };
+  const addOptionAfter = (componentIndex: number, optionIndex: number) => {
+    setFormStructure((prev) => {
+      const newFormContent = prev.form_content.map((component, i) => {
+        if (i === componentIndex) {
+          const currentOptions = component.options || [];
+          const newOptions = [
+            ...currentOptions.slice(0, optionIndex + 1),
+            "",
+            ...currentOptions.slice(optionIndex + 1),
+          ];
+          return { ...component, options: newOptions };
+        }
+        return component;
+      });
+      return { ...prev, form_content: newFormContent };
+    });
+  };
   const addOption = (index: number) => {
-    setFormStructure(prev => ({
+    setFormStructure((prev) => ({
       ...prev,
       form_content: prev.form_content.map((component, i) =>
         i === index
-          ? { ...component, options: [...(component.options || []), ''] }
-          : component
+          ? { ...component, options: [...(component.options || []), ""] }
+          : component,
       ),
-    }))
-  }
-
-  const handleOptionChange = (componentIndex: number, optionIndex: number, value: string) => {
-    setFormStructure(prev => ({
+    }));
+  };
+  const handleOptionChange = (
+    componentIndex: number,
+    optionIndex: number,
+    value: string,
+  ) => {
+    setFormStructure((prev) => ({
       ...prev,
       form_content: prev.form_content.map((component, i) =>
         i === componentIndex
           ? {
-            ...component,
-            options: component.options?.map((option, j) =>
-              j === optionIndex ? value : option
-            ) || [],
-          }
-          : component
+              ...component,
+              options:
+                component.options?.map((option, j) =>
+                  j === optionIndex ? value : option,
+                ) || [],
+            }
+          : component,
       ),
-    }))
-  }
+    }));
+  };
+  const deleteOption = (componentIndex: number, optionIndex: number) => {
+    setFormStructure((prev) => ({
+      ...prev,
+      form_content: prev.form_content.map((component, i) =>
+        i === componentIndex
+          ? {
+              ...component,
+              options:
+                component.options?.filter((_, j) => j !== optionIndex) || [],
+            }
+          : component,
+      ),
+    }));
+  };
+  const handleFormKeyDown = (event: React.KeyboardEvent<HTMLFormElement>) => {
+    if (
+      event.key === "Enter" &&
+      (event.target as HTMLElement).tagName !== "TEXTAREA"
+    ) {
+      event.preventDefault();
+    }
+  };
+  const handleOptionInputKeyDown = (
+    event: React.KeyboardEvent<HTMLInputElement>,
+    componentIndex: number,
+    optionIndex: number,
+  ) => {
+    if (event.key === "Enter") {
+      event.preventDefault();
+      addOptionAfter(componentIndex, optionIndex);
+      setFocusTarget({ componentIndex, optionIndex: optionIndex + 1 });
+    }
+  };
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     try {
-      console.log('Form Values:', values);
+      console.log("Form Values:", values);
       const formData = {
         data: {
           ...formStructure,
@@ -137,43 +245,51 @@ export default function CreateFormPage() {
           description: values.description,
           link: values.link,
           link_description: values.link_description,
-          form_content: formStructure.form_content.map(component => ({
+          form_content: formStructure.form_content.map((component) => ({
             ...component,
             type: component.type as string,
           })),
         },
         password: values.password,
       };
-      console.log('Form Data to be sent:', formData);
-
-      const response = await fetch('/api/forms', {
-        method: 'POST',
+      console.log("Form Data to be sent:", formData);
+      const response = await fetch("/api/forms", {
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
         body: JSON.stringify(formData),
       });
-
       const result = await response.json();
-      console.log('API Response:', result);
-
+      console.log("API Response:", result);
       if (response.ok) {
-        console.log('Form created successfully:', result);
-        const { id } = result;
+        console.log("Form created successfully:", result);
+        const { id, title, createdAt } = result;
         if (id) {
+          const recentForm = { id, title, createdAt };
+          const recentForms = JSON.parse(
+            localStorage.getItem("recentForms") || "[]",
+          );
+
+          const filteredForms = recentForms.filter(
+            (form: any) => form.id !== id && form.title !== title,
+          );
+
+          const updatedForms = [recentForm, ...filteredForms].slice(0, 5);
+          localStorage.setItem("recentForms", JSON.stringify(updatedForms));
           router.push(`/form-success?id=${id}`);
           toast({
             title: "Success",
             description: "Form created successfully!",
           });
         } else {
-          throw new Error('Form ID not returned from server');
+          throw new Error("Form ID not returned from server");
         }
       } else {
-        throw new Error(result.message || 'Error creating form');
+        throw new Error(result.message || "Error creating form");
       }
     } catch (error) {
-      console.error('Error creating form:', error);
+      console.error("Error creating form:", error);
       toast({
         title: "Error",
         description: "Error creating form. Please try again.",
@@ -181,124 +297,288 @@ export default function CreateFormPage() {
       });
     }
   };
-
   return (
-    <div className="w-2/3">
+    <div className="mx-auto w-full max-w-7xl">
       <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
-          <Card>
-            <CardHeader>
-              <CardTitle>Create New Form</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <Tabs defaultValue="content">
-                <TabsList>
-                  <TabsTrigger value="content">Form Content</TabsTrigger>
-                </TabsList>
-                <TabsContent value="content" className="space-y-4">
-                  <FormField
-                    control={form.control}
-                    name="title"
-                    render={({ field }: { field: any }) => (
-                      <FormItem>
-                        <FormLabel>Form Title</FormLabel>
-                        <FormControl>
-                          <Input placeholder="Enter form title" {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  <FormField
-                    control={form.control}
-                    name="description"
-                    render={({ field }: { field: any }) => (
-                      <FormItem>
-                        <FormLabel>Form Description</FormLabel>
-                        <FormControl>
-                          <Textarea placeholder="Enter form description" {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  <div className="bg-black w-82 h-1"></div>
-                  <FormField
-                    control={form.control}
-                    name="link"
-                    render={({ field }: { field: any }) => (
-                      <FormItem>
-                        <FormLabel>Related Link (optional)</FormLabel>
-                        <FormControl>
-                          <Input type="url" placeholder="https://example.com" {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  <FormField
-                    control={form.control}
-                    name="link_description"
-                    render={({ field }: { field: any }) => (
-                      <FormItem>
-                        <FormLabel>Link Description (optional)</FormLabel>
-                        <FormControl>
-                          <Input placeholder="Enter link description" {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  <Separator className="my-4" />
-                  <ScrollArea className="h-[500px] rounded-md border p-4">
-                    {formStructure.form_content.map((component, index) => (
-                      <Card key={index} className="mb-4">
-                        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                          <CardTitle className="text-sm font-medium">
-                            Question {index + 1}
-                          </CardTitle>
+        <form
+          onSubmit={form.handleSubmit(onSubmit)}
+          onKeyDown={handleFormKeyDown}
+          className="space-y-8"
+        >
+          <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+            <Card className="flex flex-col">
+              <CardHeader>
+                <CardTitle>Form Settings</CardTitle>
+              </CardHeader>
+              <CardContent className="flex-grow space-y-4">
+                <FormField
+                  control={form.control}
+                  name="title"
+                  render={({ field }: { field: any }) => (
+                    <FormItem>
+                      <FormLabel>Form Title</FormLabel>
+                      <FormControl>
+                        <Input placeholder="Enter form title" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="description"
+                  render={({ field }: { field: any }) => (
+                    <FormItem>
+                      <FormLabel>Form Description</FormLabel>
+                      <FormControl>
+                        <Textarea
+                          placeholder="Enter form description"
+                          {...field}
+                          value={field.value ?? ""}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <Separator className="my-2" />
+                <FormField
+                  control={form.control}
+                  name="link"
+                  render={({ field }: { field: any }) => (
+                    <FormItem>
+                      <FormLabel>Related Link (optional)</FormLabel>
+                      <FormControl>
+                        <Input
+                          type="url"
+                          placeholder="https://example.com"
+                          {...field}
+                          value={field.value ?? ""}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="link_description"
+                  render={({ field }: { field: any }) => (
+                    <FormItem>
+                      <FormLabel>Link Description (optional)</FormLabel>
+                      <FormControl>
+                        <Input
+                          placeholder="Enter link description"
+                          {...field}
+                          value={field.value ?? ""}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <Separator className="my-2" />
+                <FormField
+                  control={form.control}
+                  name="password"
+                  render={({ field }: { field: any }) => (
+                    <FormItem>
+                      <FormLabel>Form Password</FormLabel>
+                      <FormControl>
+                        <Input
+                          type="password"
+                          placeholder="Enter form password"
+                          {...field}
+                        />
+                      </FormControl>
+                      <FormDescription>
+                        This password will be required to edit the form later.
+                      </FormDescription>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <div className="pt-4">
+                  <Button type="submit" className="w-full">
+                    Create Form
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+            <Card className="flex flex-col">
+              <CardHeader className="flex flex-row items-center justify-between">
+                <CardTitle>Form Questions</CardTitle>
+                <Button
+                  type="button"
+                  onClick={addFormComponent}
+                  size="sm"
+                  className="ml-auto"
+                >
+                  <Plus className="mr-2 h-4 w-4" /> Add Question
+                </Button>
+              </CardHeader>
+              <CardContent className="flex-grow space-y-4">
+                <ScrollArea
+                  ref={scrollAreaRef}
+                  className="h-[calc(100vh-250px)] rounded-md border p-4"
+                >
+                  {formStructure.form_content.map((component, index) => (
+                    <Card key={index} className="mb-4">
+                      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                        <div className="flex items-center gap-2">
                           <Button
                             variant="ghost"
                             size="sm"
-                            onClick={() => deleteFormComponent(index)}
+                            type="button"
+                            onClick={() => {
+                              if (index > 0) {
+                                setFormStructure((prev) => {
+                                  const newContent = [...prev.form_content];
+                                  const temp = newContent[index]!;
+                                  newContent[index] = newContent[index - 1]!;
+                                  newContent[index - 1] = temp;
+                                  return { ...prev, form_content: newContent };
+                                });
+                              }
+                            }}
+                            disabled={index === 0}
                           >
-                            <Trash2 className="h-4 w-4" />
+                            <ArrowUp className="h-4 w-4" />
                           </Button>
-                        </CardHeader>
-                        <CardContent className="space-y-2">
-                          <Input
-                            value={component.title}
-                            onChange={(e: any) => handleComponentChange(index, 'title', e.target.value)}
-                            placeholder="Question Title"
-                            required
-                          />
-                          <Textarea
-                            value={component.description || ''}
-                            onChange={(e: any) => handleComponentChange(index, 'description', e.target.value)}
-                            placeholder="Question Description"
-                          />
-                          <Select
-                            value={component.type}
-                            onValueChange={(value: any) => handleComponentChange(index, 'type', value as FormComponentType)}
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            type="button"
+                            onClick={() => {
+                              if (
+                                index <
+                                formStructure.form_content.length - 1
+                              ) {
+                                setFormStructure((prev) => {
+                                  const newContent = [...prev.form_content];
+                                  const temp = newContent[index]!;
+                                  newContent[index] = newContent[index + 1]!;
+                                  newContent[index + 1] = temp;
+                                  return { ...prev, form_content: newContent };
+                                });
+                              }
+                            }}
+                            disabled={
+                              index === formStructure.form_content.length - 1
+                            }
                           >
-                            <SelectTrigger>
-                              <SelectValue placeholder="Select question type" />
-                            </SelectTrigger>
-                            <SelectContent>
-                              {Object.values(FormComponentType).map((type) => (
-                                <SelectItem key={type} value={type}>{type}</SelectItem>
-                              ))}
-                            </SelectContent>
-                          </Select>
+                            <ArrowDown className="h-4 w-4" />
+                          </Button>
+                        </div>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => deleteFormComponent(index)}
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </CardHeader>
+                      <CardContent className="space-y-2">
+                        <Input
+                          value={component.title}
+                          onChange={(e: any) =>
+                            handleComponentChange(
+                              index,
+                              "title",
+                              e.target.value,
+                            )
+                          }
+                          placeholder="Question Title"
+                          required
+                        />
+                        <Textarea
+                          value={component.description ?? ""}
+                          onChange={(e: any) =>
+                            handleComponentChange(
+                              index,
+                              "description",
+                              e.target.value,
+                            )
+                          }
+                          placeholder="Question Description"
+                        />
+                        <div className="my-2 flex flex-wrap gap-2">
+                          {Object.values(FormComponentType).map((type) => (
+                            <Button
+                              key={type}
+                              type="button"
+                              variant={
+                                component.type === type ? "default" : "outline"
+                              }
+                              size="sm"
+                              onClick={() =>
+                                handleComponentChange(index, "type", type)
+                              }
+                              className="flex items-center gap-1"
+                            >
+                              {type === FormComponentType.ShortText && (
+                                <Type className="h-4 w-4" />
+                              )}
+                              {type === FormComponentType.LongText && (
+                                <AlignLeft className="h-4 w-4" />
+                              )}
+                              {type === FormComponentType.ComboBox && (
+                                <List className="h-4 w-4" />
+                              )}
+                              {type === FormComponentType.MultiSelect && (
+                                <CheckSquare className="h-4 w-4" />
+                              )}
+                              {type === FormComponentType.MultiChoice && (
+                                <Check className="h-4 w-4" />
+                              )}
+                              {type === FormComponentType.RadioGroup && (
+                                <CircleDot className="h-4 w-4" />
+                              )}
+                              {type === FormComponentType.Slider && (
+                                <Sliders className="h-4 w-4" />
+                              )}
+                              {type}
+                            </Button>
+                          ))}
+                        </div>
+                        <div className="min-h-[60px]">
                           {typesWithOptions.includes(component.type) && (
                             <div className="space-y-2">
                               {component.options?.map((option, optionIndex) => (
-                                <Input
+                                <div
                                   key={optionIndex}
-                                  value={option}
-                                  onChange={(e: any) => handleOptionChange(index, optionIndex, e.target.value)}
-                                  placeholder={`Option ${optionIndex + 1}`}
-                                />
+                                  className="flex items-center gap-2"
+                                >
+                                  <Input
+                                    id={`option-input-${index}-${optionIndex}`}
+                                    value={option}
+                                    onChange={(e: any) =>
+                                      handleOptionChange(
+                                        index,
+                                        optionIndex,
+                                        e.target.value,
+                                      )
+                                    }
+                                    onKeyDown={(e) =>
+                                      handleOptionInputKeyDown(
+                                        e,
+                                        index,
+                                        optionIndex,
+                                      )
+                                    }
+                                    placeholder={`Option ${optionIndex + 1}`}
+                                  />
+                                  <Button
+                                    type="button"
+                                    variant="ghost"
+                                    size="icon"
+                                    onClick={() =>
+                                      deleteOption(index, optionIndex)
+                                    }
+                                  >
+                                    <X className="h-4 w-4" />
+                                  </Button>
+                                </div>
                               ))}
                               <Button
                                 type="button"
@@ -310,40 +590,126 @@ export default function CreateFormPage() {
                               </Button>
                             </div>
                           )}
-                        </CardContent>
-                      </Card>
-                    ))}
-                  </ScrollArea>
-                  <Button type="button" onClick={addFormComponent} className="w-full">
-                    <Plus className="mr-2 h-4 w-4" /> Add Question
-                  </Button>
-                </TabsContent>
-              </Tabs>
-            </CardContent>
-          </Card >
-          <Card>
-            <CardContent className="pt-6">
-              <FormField
-                control={form.control}
-                name="password"
-                render={({ field }: { field: any }) => (
-                  <FormItem>
-                    <FormLabel>Form Password</FormLabel>
-                    <FormControl>
-                      <Input type="password" placeholder="Enter form password" {...field} />
-                    </FormControl>
-                    <FormDescription>
-                      This password will be required to edit the form later.
-                    </FormDescription>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </CardContent>
-          </Card>
-          <Button type="submit" className="w-full">Create Form</Button>
-        </form >
-      </Form >
-    </div >
-  )
+                          {component.type === FormComponentType.Slider && (
+                            <div className="space-y-4 pt-2">
+                              <div className="grid grid-cols-3 gap-4">
+                                <div>
+                                  <Label htmlFor={`slider-min-${index}`}>
+                                    Min Value
+                                  </Label>
+                                  <Input
+                                    id={`slider-min-${index}`}
+                                    type="number"
+                                    value={component.min ?? 0}
+                                    onChange={(e: any) => {
+                                      const parsedValue = parseInt(
+                                        e.target.value,
+                                      );
+                                      handleComponentChange(
+                                        index,
+                                        "min",
+                                        isNaN(parsedValue) ? 0 : parsedValue,
+                                      );
+                                    }}
+                                    placeholder="Min"
+                                  />
+                                </div>
+                                <div>
+                                  <Label htmlFor={`slider-max-${index}`}>
+                                    Max Value
+                                  </Label>
+                                  <Input
+                                    id={`slider-max-${index}`}
+                                    type="number"
+                                    value={component.max ?? 100}
+                                    onChange={(e: any) => {
+                                      const parsedValue = parseInt(
+                                        e.target.value,
+                                      );
+                                      handleComponentChange(
+                                        index,
+                                        "max",
+                                        isNaN(parsedValue) ? 100 : parsedValue,
+                                      );
+                                    }}
+                                    placeholder="Max"
+                                  />
+                                </div>
+                                <div>
+                                  <Label htmlFor={`slider-default-${index}`}>
+                                    Default
+                                  </Label>
+                                  <Input
+                                    id={`slider-default-${index}`}
+                                    type="number"
+                                    value={
+                                      component.default ??
+                                      ((component.min ?? 0) +
+                                        (component.max ?? 100)) /
+                                        2
+                                    }
+                                    onChange={(e: any) => {
+                                      const parsedValue = parseInt(
+                                        e.target.value,
+                                      );
+                                      const fallbackDefault =
+                                        ((component.min ?? 0) +
+                                          (component.max ?? 100)) /
+                                        2;
+                                      handleComponentChange(
+                                        index,
+                                        "default",
+                                        isNaN(parsedValue)
+                                          ? fallbackDefault
+                                          : parsedValue,
+                                      );
+                                    }}
+                                    placeholder="Default"
+                                  />
+                                </div>
+                              </div>
+                              <div className="pt-2">
+                                <Label>Preview</Label>
+                                <div className="flex items-center justify-between pb-1 pt-2">
+                                  <span className="text-sm">
+                                    {component.min ?? 0}
+                                  </span>
+                                  <span className="text-sm">
+                                    {component.default ??
+                                      ((component.min ?? 0) +
+                                        (component.max ?? 100)) /
+                                        2}
+                                  </span>
+                                  <span className="text-sm">
+                                    {component.max ?? 100}
+                                  </span>
+                                </div>
+                                <input
+                                  type="range"
+                                  min={component.min ?? 0}
+                                  max={component.max ?? 100}
+                                  value={
+                                    component.default ??
+                                    ((component.min ?? 0) +
+                                      (component.max ?? 100)) /
+                                      2
+                                  }
+                                  disabled
+                                  className="h-2 w-full cursor-pointer appearance-none rounded-lg bg-gray-200 dark:bg-gray-700"
+                                />
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      </CardContent>
+                    </Card>
+                  ))}
+                </ScrollArea>
+              </CardContent>
+            </Card>
+          </div>
+        </form>
+      </Form>
+    </div>
+  );
 }
