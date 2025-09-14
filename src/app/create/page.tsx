@@ -5,6 +5,8 @@ import {
   FormStructure,
   FormComponent,
   FormComponentType,
+  ContactCollectionSettings,
+  CustomField,
 } from "~/types/formtypes";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -19,7 +21,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "~/components/ui/select";
-import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "~/components/ui/card";
 import {
   Form,
   FormControl,
@@ -48,12 +50,15 @@ import {
 } from "lucide-react";
 import { toast } from "~/components/ui/use-toast";
 import { Label } from "~/components/ui/label";
+import { Checkbox } from "~/components/ui/checkbox";
+import { Switch } from "~/components/ui/switch";
 const defaultFormComponent: FormComponent = {
   index: 0,
   title: "",
   description: "",
   type: FormComponentType.ShortText,
   options: [],
+  required: false,
 };
 const typesWithOptions = [
   FormComponentType.ComboBox,
@@ -77,6 +82,12 @@ export default function CreateFormPage() {
     link: "",
     link_description: "",
     form_content: [{ ...defaultFormComponent }],
+    contactCollection: {
+      collectName: true,
+      collectEmail: true,
+      collectCompany: false,
+      customFields: [],
+    },
   });
   const [focusTarget, setFocusTarget] = useState<{
     componentIndex: number;
@@ -216,6 +227,40 @@ export default function CreateFormPage() {
       ),
     }));
   };
+
+  const updateContactCollection = (field: keyof ContactCollectionSettings, value: any) => {
+    setFormStructure((prev) => ({
+      ...prev,
+      contactCollection: {
+        ...prev.contactCollection!,
+        [field]: value,
+      },
+    }));
+  };
+
+  const addCustomField = () => {
+    const newField: CustomField = {
+      name: `custom_field_${formStructure.contactCollection!.customFields.length + 1}`,
+      label: "",
+      required: false,
+    };
+    updateContactCollection("customFields", [
+      ...formStructure.contactCollection!.customFields,
+      newField,
+    ]);
+  };
+
+  const updateCustomField = (index: number, field: keyof CustomField, value: any) => {
+    const updatedFields = formStructure.contactCollection!.customFields.map((customField, i) =>
+      i === index ? { ...customField, [field]: value } : customField
+    );
+    updateContactCollection("customFields", updatedFields);
+  };
+
+  const deleteCustomField = (index: number) => {
+    const updatedFields = formStructure.contactCollection!.customFields.filter((_, i) => i !== index);
+    updateContactCollection("customFields", updatedFields);
+  };
   const handleFormKeyDown = (event: React.KeyboardEvent<HTMLFormElement>) => {
     if (
       event.key === "Enter" &&
@@ -237,7 +282,6 @@ export default function CreateFormPage() {
   };
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     try {
-      console.log("Form Values:", values);
       const formData = {
         data: {
           ...formStructure,
@@ -252,7 +296,6 @@ export default function CreateFormPage() {
         },
         password: values.password,
       };
-      console.log("Form Data to be sent:", formData);
       const response = await fetch("/api/forms", {
         method: "POST",
         headers: {
@@ -261,9 +304,7 @@ export default function CreateFormPage() {
         body: JSON.stringify(formData),
       });
       const result = await response.json();
-      console.log("API Response:", result);
       if (response.ok) {
-        console.log("Form created successfully:", result);
         const { id, title, createdAt } = result;
         if (id) {
           const recentForm = { id, title, createdAt };
@@ -305,7 +346,7 @@ export default function CreateFormPage() {
           onKeyDown={handleFormKeyDown}
           className="space-y-8"
         >
-          <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+          <div className="grid grid-cols-1 gap-6 lg:grid-cols-3 md:grid-cols-2">
             <Card className="flex flex-col">
               <CardHeader>
                 <CardTitle>Form Settings</CardTitle>
@@ -502,44 +543,82 @@ export default function CreateFormPage() {
                           }
                           placeholder="Question Description"
                         />
-                        <div className="my-2 flex flex-wrap gap-2">
-                          {Object.values(FormComponentType).map((type) => (
-                            <Button
-                              key={type}
-                              type="button"
-                              variant={
-                                component.type === type ? "default" : "outline"
-                              }
-                              size="sm"
-                              onClick={() =>
-                                handleComponentChange(index, "type", type)
-                              }
-                              className="flex items-center gap-1"
-                            >
-                              {type === FormComponentType.ShortText && (
-                                <Type className="h-4 w-4" />
-                              )}
-                              {type === FormComponentType.LongText && (
-                                <AlignLeft className="h-4 w-4" />
-                              )}
-                              {type === FormComponentType.ComboBox && (
-                                <List className="h-4 w-4" />
-                              )}
-                              {type === FormComponentType.MultiSelect && (
-                                <CheckSquare className="h-4 w-4" />
-                              )}
-                              {type === FormComponentType.MultiChoice && (
-                                <Check className="h-4 w-4" />
-                              )}
-                              {type === FormComponentType.RadioGroup && (
-                                <CircleDot className="h-4 w-4" />
-                              )}
-                              {type === FormComponentType.Slider && (
-                                <Sliders className="h-4 w-4" />
-                              )}
-                              {type}
-                            </Button>
-                          ))}
+                        <div className="flex items-center space-x-2">
+                          <Switch
+                            id={`required-${index}`}
+                            checked={component.required ?? false}
+                            onCheckedChange={(checked) =>
+                              handleComponentChange(index, "required", checked)
+                            }
+                          />
+                          <Label htmlFor={`required-${index}`}>Required field</Label>
+                        </div>
+                        <div className="my-2">
+                          <Select
+                            value={component.type}
+                            onValueChange={(value) =>
+                              handleComponentChange(index, "type", value as FormComponentType)
+                            }
+                          >
+                            <SelectTrigger className="w-full">
+                              <SelectValue placeholder="Select question type">
+                                <div className="flex items-center gap-2">
+                                  {component.type === FormComponentType.ShortText && (
+                                    <Type className="h-4 w-4" />
+                                  )}
+                                  {component.type === FormComponentType.LongText && (
+                                    <AlignLeft className="h-4 w-4" />
+                                  )}
+                                  {component.type === FormComponentType.ComboBox && (
+                                    <List className="h-4 w-4" />
+                                  )}
+                                  {component.type === FormComponentType.MultiSelect && (
+                                    <CheckSquare className="h-4 w-4" />
+                                  )}
+                                  {component.type === FormComponentType.MultiChoice && (
+                                    <Check className="h-4 w-4" />
+                                  )}
+                                  {component.type === FormComponentType.RadioGroup && (
+                                    <CircleDot className="h-4 w-4" />
+                                  )}
+                                  {component.type === FormComponentType.Slider && (
+                                    <Sliders className="h-4 w-4" />
+                                  )}
+                                  {component.type}
+                                </div>
+                              </SelectValue>
+                            </SelectTrigger>
+                            <SelectContent>
+                              {Object.values(FormComponentType).map((type) => (
+                                <SelectItem key={type} value={type}>
+                                  <div className="flex items-center gap-2">
+                                    {type === FormComponentType.ShortText && (
+                                      <Type className="h-4 w-4" />
+                                    )}
+                                    {type === FormComponentType.LongText && (
+                                      <AlignLeft className="h-4 w-4" />
+                                    )}
+                                    {type === FormComponentType.ComboBox && (
+                                      <List className="h-4 w-4" />
+                                    )}
+                                    {type === FormComponentType.MultiSelect && (
+                                      <CheckSquare className="h-4 w-4" />
+                                    )}
+                                    {type === FormComponentType.MultiChoice && (
+                                      <Check className="h-4 w-4" />
+                                    )}
+                                    {type === FormComponentType.RadioGroup && (
+                                      <CircleDot className="h-4 w-4" />
+                                    )}
+                                    {type === FormComponentType.Slider && (
+                                      <Sliders className="h-4 w-4" />
+                                    )}
+                                    {type}
+                                  </div>
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
                         </div>
                         <div className="min-h-[60px]">
                           {typesWithOptions.includes(component.type) && (
@@ -705,6 +784,110 @@ export default function CreateFormPage() {
                     </Card>
                   ))}
                 </ScrollArea>
+              </CardContent>
+            </Card>
+            
+            <Card className="flex flex-col">
+              <CardHeader>
+                <CardTitle>Contact Collection</CardTitle>
+                <CardDescription>
+                  Collect contact information from form respondents
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="space-y-3">
+                  <div className="flex items-center space-x-2">
+                    <Checkbox
+                      id="collect-name"
+                      checked={formStructure.contactCollection?.collectName}
+                      onCheckedChange={(checked) => 
+                        updateContactCollection("collectName", checked)
+                      }
+                    />
+                    <Label htmlFor="collect-name">Collect Name</Label>
+                  </div>
+                  
+                  <div className="flex items-center space-x-2">
+                    <Checkbox
+                      id="collect-email"
+                      checked={formStructure.contactCollection?.collectEmail}
+                      onCheckedChange={(checked) => 
+                        updateContactCollection("collectEmail", checked)
+                      }
+                    />
+                    <Label htmlFor="collect-email">Collect Email</Label>
+                  </div>
+                  
+                  <div className="flex items-center space-x-2">
+                    <Checkbox
+                      id="collect-company"
+                      checked={formStructure.contactCollection?.collectCompany}
+                      onCheckedChange={(checked) => 
+                        updateContactCollection("collectCompany", checked)
+                      }
+                    />
+                    <Label htmlFor="collect-company">Collect Company</Label>
+                  </div>
+                </div>
+                
+                <Separator />
+                
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between">
+                    <Label className="text-sm font-medium">Custom Fields</Label>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={addCustomField}
+                    >
+                      <Plus className="h-4 w-4 mr-1" />
+                      Add Field
+                    </Button>
+                  </div>
+                  
+                  {formStructure.contactCollection?.customFields.map((field, index) => (
+                    <Card key={index} className="p-3">
+                      <div className="space-y-2">
+                        <div className="flex items-center justify-between">
+                          <Input
+                            placeholder="Field Label"
+                            value={field.label}
+                            onChange={(e) => updateCustomField(index, "label", e.target.value)}
+                            className="flex-1"
+                          />
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => deleteCustomField(index)}
+                            className="ml-2"
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </div>
+                        <div className="flex items-center space-x-2">
+                          <Checkbox
+                            id={`custom-required-${index}`}
+                            checked={field.required}
+                            onCheckedChange={(checked) => 
+                              updateCustomField(index, "required", checked)
+                            }
+                          />
+                          <Label htmlFor={`custom-required-${index}`} className="text-sm">
+                            Required
+                          </Label>
+                        </div>
+                      </div>
+                    </Card>
+                  ))}
+                  
+                  {formStructure.contactCollection?.customFields.length === 0 && (
+                    <p className="text-sm text-muted-foreground text-center py-4">
+                      No custom fields added yet
+                    </p>
+                  )}
+                </div>
               </CardContent>
             </Card>
           </div>

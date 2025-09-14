@@ -23,7 +23,7 @@ export const FormRenderer: React.FC<{ formData: FormStructure }> = ({
     }
   };
   return (
-    <Card className="w-full">
+    <Card className="w-full shadow-md">
       <CardHeader className="pb-6">
         <CardTitle className="text-2xl font-bold">{title}</CardTitle>
         {description && (
@@ -36,7 +36,7 @@ export const FormRenderer: React.FC<{ formData: FormStructure }> = ({
             href={link.toString()}
             target="_blank"
             rel="noopener noreferrer"
-            className="pt-3 text-sm text-blue-600 hover:underline"
+            className="hover:text-primary pt-3 text-sm text-blue-600 hover:underline transition-colors"
           >
             {renderLinkDescription()}
           </a>
@@ -47,13 +47,14 @@ export const FormRenderer: React.FC<{ formData: FormStructure }> = ({
           {form_content.map((component: FormComponent) => (
             <div
               key={component.index}
-              className="space-y-3 rounded-md border p-5"
+              className="bg-muted/30 space-y-3 rounded-lg border p-5 shadow-sm"
             >
               <Label
                 htmlFor={`form-component-${component.index}`}
                 className="text-base font-semibold"
               >
                 {component.title}
+                {component.required && <span className="text-red-500 ml-1">*</span>}
               </Label>
               {component.description && (
                 <p className="text-muted-foreground pb-2 text-sm">

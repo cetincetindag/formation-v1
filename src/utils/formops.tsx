@@ -27,6 +27,7 @@ export const FormCmpBuilder = (form_cmp: FormComponent) => {
           type="text"
           placeholder={form_cmp.title}
           className="w-full px-3 py-2"
+          required={form_cmp.required}
         />
       );
     case FormComponentType.LongText:
@@ -36,11 +37,12 @@ export const FormCmpBuilder = (form_cmp: FormComponent) => {
           name={form_cmp.title}
           placeholder={form_cmp.title}
           className="min-h-[100px] w-full px-3 py-2"
+          required={form_cmp.required}
         />
       );
     case FormComponentType.ComboBox:
       return (
-        <Select name={form_cmp.title}>
+        <Select name={form_cmp.title} required={form_cmp.required}>
           <SelectTrigger className="w-full text-black">
             <SelectValue placeholder={form_cmp.title} />
           </SelectTrigger>
@@ -64,6 +66,7 @@ export const FormCmpBuilder = (form_cmp: FormComponent) => {
                 name={form_cmp.title}
                 value={option}
                 className="text-primary focus:ring-primary h-4 w-4 rounded border-gray-300"
+                required={form_cmp.required && index === 0}
               />
               <Label
                 htmlFor={`${id}-option-${index}`}
@@ -86,6 +89,7 @@ export const FormCmpBuilder = (form_cmp: FormComponent) => {
                 name={form_cmp.title}
                 value={option}
                 className="text-primary focus:ring-primary h-4 w-4 rounded border-gray-300"
+                required={form_cmp.required && index === 0}
               />
               <Label
                 htmlFor={`${id}-option-${index}`}
@@ -108,6 +112,7 @@ export const FormCmpBuilder = (form_cmp: FormComponent) => {
                 name={form_cmp.title}
                 value={option}
                 className="text-primary focus:ring-primary h-4 w-4 border-gray-300"
+                required={form_cmp.required}
               />
               <Label
                 htmlFor={`${id}-option-${index}`}
@@ -144,6 +149,12 @@ export const FormCmpBuilder = (form_cmp: FormComponent) => {
               }
               value={value}
               className="w-full"
+            />
+            <input
+              type="hidden"
+              name={form_cmp.title}
+              value={value}
+              required={form_cmp.required}
             />
           </div>
         );

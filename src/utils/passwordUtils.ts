@@ -1,6 +1,7 @@
 import bcrypt from 'bcrypt';
 import CryptoJS from 'crypto-js';
-const ENCRYPTION_KEY = process.env.ENCRYPTION_KEY || 'defaultEncryptionKey';
+import { env } from '~/env.js';
+const ENCRYPTION_KEY = env.ENCRYPTION_KEY;
 export const hashPassword = async (password: string): Promise<string> => {
   const saltRounds = 10;
   return bcrypt.hash(password, saltRounds);

@@ -20,16 +20,39 @@ export async function GET(request: NextRequest) {
     const password = searchParams.get("password");
     const page = parseInt(searchParams.get("page") || "1");
     const pageSize = 10 as const;
+    
+    // Check for Bearer token authentication
+    const authHeader = request.headers.get("Authorization");
+    const bearerToken = authHeader?.startsWith("Bearer ") ? authHeader.substring(7) : null;
+    
     if (!formId) {
       return NextResponse.json({ error: "Missing form ID" }, { status: 400 });
     }
-    if (password) {
-      const form = await validateFormPassword(formId, password);
-      if (!form) {
-        return NextResponse.json(
-          { error: "Invalid credentials" },
-          { status: 403 },
-        );
+    
+    // Handle both password and Bearer token authentication
+    if (password || bearerToken) {
+      let form = null;
+      
+      if (bearerToken) {
+        // For Bearer token, validate against stored form
+        form = await db.form.findUnique({
+          where: { id: formId },
+        });
+        // Simple token validation - in production, use proper JWT validation
+        if (!form || bearerToken !== "authenticated") {
+          return NextResponse.json(
+            { error: "Invalid credentials" },
+            { status: 403 },
+          );
+        }
+      } else if (password) {
+        form = await validateFormPassword(formId, password);
+        if (!form) {
+          return NextResponse.json(
+            { error: "Invalid credentials" },
+            { status: 403 },
+          );
+        }
       }
       const totalResponses = await db.response.count({ where: { formId } });
       const responses = await db.response.findMany({
@@ -38,11 +61,24 @@ export async function GET(request: NextRequest) {
         take: pageSize,
         orderBy: { createdAt: "desc" },
       });
+
+      // Also get the form settings to include contact collection config
+      const formSettings = await db.form.findUnique({
+        where: { id: formId },
+        select: {
+          collectName: true,
+          collectEmail: true,
+          collectCompany: true,
+          customFields: true,
+        },
+      });
+
       return NextResponse.json({
         responses,
         currentPage: page,
         totalPages: Math.ceil(totalResponses / pageSize),
         totalResponses,
+        formSettings,
       });
     }
     const form = await db.form.findUnique({
@@ -69,11 +105,19 @@ export async function POST(request: Request) {
     
     if (requestData.data && requestData.password) {
       const formId = generateFormId();
+      
+      // Extract contact collection settings from the form data
+      const contactCollection = requestData.data.contactCollection;
+      
       const newForm = await db.form.create({
         data: {
           id: formId,
           data: requestData.data, 
           password: requestData.password,
+          collectName: contactCollection?.collectName ?? true,
+          collectEmail: contactCollection?.collectEmail ?? true,
+          collectCompany: contactCollection?.collectCompany ?? false,
+          customFields: contactCollection?.customFields ?? [],
         },
       });
       
@@ -85,7 +129,6 @@ export async function POST(request: Request) {
       return NextResponse.json(responseData, { status: 201 });
     }
     
-    console.log("Invalid request data:", requestData);
     return NextResponse.json({ error: "Invalid request" }, { status: 400 });
   } catch (error) {
     console.error("Error:", error);

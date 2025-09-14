@@ -8,21 +8,30 @@ datasource db {
 }
 
 model Form {
-  id        String     @id @default("custom_id") // Custom ID will be overridden by nanoid in code
-  password  String
-  data      Json 
-  createdAt DateTime   @default(now())
-  updatedAt DateTime   @updatedAt
-  responses Response[]
+  id             String     @id @default("custom_id")
+  password       String
+  data           Json
+  createdAt      DateTime   @default(now())
+  updatedAt      DateTime   @updatedAt
+  collectCompany Boolean    @default(false)
+  collectEmail   Boolean    @default(true)
+  collectName    Boolean    @default(true)
+  customFields   Json       @default("[]")
+  responses      Response[]
 }
 
 model Response {
-  id        String   @id @default(cuid())
-  data      Json
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  form      Form     @relation(fields: [formId], references: [id])
-  formId    String
+  id             String   @id @default(cuid())
+  data           Json
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+  formId         String
+  contactCompany String?
+  contactEmail   String?
+  contactName    String?
+  customData     Json     @default("{}")
+  form           Form     @relation(fields: [formId], references: [id])
 
   @@index([formId])
+  @@index([contactEmail])
 }

@@ -100,28 +100,6 @@ export default function ManageLayout({
         </div>
       </header>
       <div className="mx-auto w-full max-w-screen-xl px-4 py-6 sm:px-6 lg:px-8">
-        {!isRootManagePage && formUrl && (
-          <div className="mb-6 hidden md:block">
-            <div className="flex space-x-4">
-              {navItems.map((item) => (
-                <Link key={item.href} href={item.href}>
-                  <Button
-                    variant={pathname === item.href ? "default" : "outline"}
-                    size="sm"
-                    className={cn(
-                      "flex items-center gap-1",
-                      pathname !== item.href && "text-black",
-                    )}
-                  >
-                    <item.icon className="h-4 w-4" />
-                    <span>{item.title}</span>
-                  </Button>
-                </Link>
-              ))}
-            </div>
-            <Separator className="mt-6" />
-          </div>
-        )}
         {children}
       </div>
     </div>

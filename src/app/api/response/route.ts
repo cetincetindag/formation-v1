@@ -3,7 +3,7 @@ import { db } from "~/server/db";
 
 export async function POST(request: NextRequest) {
   try {
-    const { formId, data } = await request.json();
+    const { formId, data, contactData } = await request.json();
 
     if (!formId) {
       return NextResponse.json({ message: "Missing form ID" }, { status: 400 });
@@ -25,11 +25,15 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ message: "Form not found" }, { status: 404 });
     }
 
-    // Create the response record
+    // Create the response record with contact data
     await db.response.create({
       data: {
         formId,
         data,
+        contactName: contactData?.name || null,
+        contactEmail: contactData?.email || null,
+        contactCompany: contactData?.company || null,
+        customData: contactData?.customData || {},
       },
     });
 
